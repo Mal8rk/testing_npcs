@@ -1,0 +1,14 @@
+{
+	"style" : "groupbox",
+	"title" : "E-Reader Coin Settings",
+	"layout": [
+	
+		{
+			"control": "combobox",
+			"name": "style",
+			"title": "E-Reader Coin Image:",
+			"elements": ["Mushroom", "Fire Flower", "Star", "Tanooki"],
+			"value-default": 0
+	         }
+         ]
+}

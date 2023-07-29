@@ -1,0 +1,8 @@
+[1]
+onTick=TICK_ECOIN
+variants=4
+frames=4
+framespeed = 3
+lifetime=90
+width=48
+height=48

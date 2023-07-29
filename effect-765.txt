@@ -1,0 +1,43 @@
+[1]
+xAlign = MID
+yAlign = MID
+frames = 8
+framespeed = 8
+lifetime = 8
+
+[star]
+import = AI_SINGLE
+xAlign = MID
+yAlign = MID
+frames = 8
+framespeed = 4
+animationFrame = 1
+gravity = 0.32
+
+delay = 8
+
+x = 8
+y = -16
+speedX = 0.90
+speedY = -4.75
+
+[2]
+template=star
+x = -8
+y = -16
+speedX = -0.90
+speedY = -4.75
+
+[3]
+template=star
+x = 16
+y = -8
+speedX = -2
+speedY = -2.5
+
+[4]
+template=star
+x = 16
+y = 8
+speedX = 2
+speedY = -2.5

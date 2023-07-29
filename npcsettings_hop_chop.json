@@ -1,0 +1,13 @@
+{
+	"style" : "groupbox",
+	"title" : "Hop Chop Settings",
+	"layout": [	
+{
+			"control": "combobox",
+			"name": "list",
+			"title": "Hop Chop Behaviour",
+			"elements": ["Normal", "Spawn Spring"],
+			"value-default": 0
+		}
+		]
+}

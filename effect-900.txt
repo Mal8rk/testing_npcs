@@ -1,0 +1,5 @@
+[1]
+speedY=-0.6
+frames=4
+framespeed = 3
+lifetime=42

@@ -1,0 +1,2 @@
+This NPC is meant to be hidden in ? blocks, or in the ? clouds that come with MDA's Yoshi Playable. 
+Doesn't work in containers though, I'm still figuring that one out
