@@ -77,6 +77,9 @@ npcManager.registerHarmTypes(npcID,
 
 local STATE_IDLE = 0
 local STATE_SHOOT = 1
+local spawnOffset = {}
+spawnOffset[-1] = (sampleNPCSettings.width - 44)
+spawnOffset[1] = (sampleNPCSettings.width - 50)
 
 function sampleNPC.onInitAPI()
 	npcManager.registerEvent(npcID, sampleNPC, "onTickNPC")
@@ -138,17 +141,19 @@ function sampleNPC.onTickNPC(v)
 	    data.shootTimer = data.shootTimer + 1
 		if data.shootTimer == 1 then
 		    SFX.play("Barrel_blast.mp3")
-		    local barrel = NPC.spawn(834, v.x, v.y - 32, player.section, false)
+		    local barrel = NPC.spawn(834, v.x + spawnOffset[v.direction], v.y - 32, player.section, false)
 			barrel.speedY = -2.8
 			barrel.spawnDirection = v.direction
-			Effect.spawn(760, v.x, v.y - 32)
+			Effect.spawn(760, v.x + spawnOffset[v.direction], v.y - 32)
 		elseif data.shootTimer > 3 and data.shootTimer <= 5 then
-            v.animationFrame = math.floor(data.shootTimer / 1) % 7 + 2
+		    data.animTimer = data.animTimer + 1
+            v.animationFrame = math.floor(data.animTimer / 1) % 8 + 1
 			v.animationTimer = 0
-		elseif data.shootTimer > 44 and data.shootTimer <= 74 then
+		elseif data.shootTimer > 30 and data.shootTimer <= 74 then
             data.state = STATE_IDLE
 			data.timer = 0
 			data.shootTimer = 0
+			data.animTimer = 0
 		end
 	end
 
