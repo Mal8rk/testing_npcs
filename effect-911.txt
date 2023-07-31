@@ -1,0 +1,4 @@
+[1]
+lifetime=8
+frames=4
+framespeed=2

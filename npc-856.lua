@@ -117,6 +117,7 @@ function sampleNPC.onTickNPC(v)
 	if Defines.levelFreeze then return end
 	
 	local data = v.data
+	local settings = v.data._settings
 	
 	--If despawned
 	if v.despawnTimer <= 0 then
@@ -141,6 +142,9 @@ function sampleNPC.onTickNPC(v)
 	end
 	
 	--Execute main AI. This template just jumps when it touches the ground.
+
+	local npc = NPC.get(911)
+
 	if v.collidesBlockBottom then
 	    data.timer = data.timer + 1
 	    if data.timer >= 32 then
@@ -150,6 +154,19 @@ function sampleNPC.onTickNPC(v)
 		    local bean = NPC.spawn(857, v.x - 26, v.y - 64)
 	        bean.direction = 1
 	        bean.spawnDirection = v.direction
+	    end
+	end
+	if settings.list == 1 then
+	    data.timer = 0
+	    for _, npc in ipairs(NPC.get(911)) do
+	        if Colliders.collide(npc, v) then
+			    Effect.spawn(772, v.x - 44, v.y - 44)
+			    SFX.play(6)
+		        v:kill(HARM_TYPE_OFFSCREEN)
+		        local bean = NPC.spawn(857, v.x - 26, v.y - 64)
+	            bean.direction = 1
+	            bean.spawnDirection = v.direction
+			end
 	    end
 	end
 end

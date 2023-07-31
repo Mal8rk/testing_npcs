@@ -234,8 +234,7 @@ ID:10;X:-179902;Y:-180240;D:-1;
 ID:10;X:-179902;Y:-180304;D:-1;
 ID:310;X:-179911;Y:-180439;D:-1;
 ID:815;X:-179392;Y:-180192;D:-1;
-ID:783;X:-199520;Y:-200160;D:1;
-ID:783;X:-199584;Y:-200160;D:-1;
+ID:910;X:-199680;Y:-200128;D:-1;
 NPC_END
 LAYERS
 LR:"Default";
@@ -251,6 +250,6 @@ ET:"P Switch - End";AS:0;AX:0;AY:0;
 ET:"yoshi no move";TE:"title move";TD:4;PC:100000000000;AS:0;AX:0;AY:0;
 ET:"title move";LS:["title"];TE:"title stop";TD:5;DS:1;PC:100000000000;ML:"title";MX:-14;MY:0;AS:0;AX:0;AY:0;
 ET:"title stop";TE:"title movi";TD:8;PC:100000000000;ML:"title";MX:0;MY:0;AS:0;AX:0;AY:0;
-ET:"title movi";TE:"camera";TD:7;PC:100000000000;ML:"title";MX:-14;MY:0;AS:0;AX:0;AY:0;
+ET:"title movi";SD:64;TE:"camera";TD:7;PC:100000000000;ML:"title";MX:-14;MY:0;AS:0;AX:0;AY:0;
 ET:"camera";LH:["cam"];DS:1;AS:0;AX:0;AY:0;
 EVENTS_CLASSIC_END

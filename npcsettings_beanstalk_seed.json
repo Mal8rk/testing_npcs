@@ -1,0 +1,13 @@
+{
+	"style" : "groupbox",
+	"title" : "Seed Settings",
+	"layout": [	
+{
+			"control": "combobox",
+			"name": "list",
+			"title": "Seed Type",
+			"elements": ["Normal", "Needs Water Bomb"],
+			"value-default": 0
+		}
+		]
+}
