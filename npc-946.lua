@@ -1,4 +1,5 @@
 local npcManager = require("npcManager")
+local npcutils = require("npcs/npcutils")
 
 local sampleNPC = {}
 
@@ -7,18 +8,18 @@ local npcID = NPC_ID
 local sampleNPCSettings = {
 	id = npcID,
 
-	gfxheight = 48,
-	gfxwidth = 34,
+	gfxheight = 52,
+	gfxwidth = 52,
 
-	width = 32,
-	height = 32,
+	width = 48,
+	height = 48,
 
 	gfxoffsetx = 0,
 	gfxoffsety = 0,
 
-	frames = 8,
-	framestyle = 1,
-	framespeed = 6, 
+	frames = 4,
+	framestyle = 0,
+	framespeed = 3, 
 
 	speed = 1,
 
@@ -27,20 +28,20 @@ local sampleNPCSettings = {
 	playerblock = false,
 	playerblocktop = false, 
 
-	nohurt=true,
-	nogravity = false,
-	noblockcollision = false,
+	nohurt=false,
+	nogravity = true,
+	noblockcollision = true,
 	nofireball = true,
-	noiceball = false,
-	noyoshi= false,
-	nowaterphysics = false,
+	noiceball = true,
+	noyoshi= true,
+	nowaterphysics = true,
 
-	jumphurt = false, 
+	jumphurt = true, 
 	spinjumpsafe = false, 
 	harmlessgrab = false, 
 	harmlessthrown = false, 
 
-	grabside=true,
+	grabside=false,
 	grabtop=false,
 }
 
@@ -92,7 +93,6 @@ function sampleNPC.onTickNPC(v)
 
 	if not data.initialized then
 		data.initialized = true
-		data.timer = 0
 	end
 
 	if v:mem(0x12C, FIELD_WORD) > 0    
@@ -101,41 +101,6 @@ function sampleNPC.onTickNPC(v)
 	then
 		--Handling
 	end
-
-	data.timer = data.timer + 1
-	v.animationFrame = math.floor(data.timer / 6) % 6
-	v.animationTimer = 0
-
-	local explosions = Explosion.get()
-	local myExplosionID = Explosion.register(32, 781, 43, true, false)
-
-	if data.timer >= 270 then
-		local newExplosion = Explosion.spawn(v.x+v.width*0.5, v.y+v.height*0.5, myExplosionID)
-        SFX.play(43)
-		v:kill(HARM_TYPE_VANISH)
-	elseif data.timer >= 200 then
-		v.animationFrame = math.floor(data.timer / 6) % 2 + 6
-		v.animationTimer = 0
-	end
-
-    if v:mem(0x12C,FIELD_WORD) == 0 then
-        if v.collidesBlockBottom then
-            if v.speedX > 0 then
-                v.speedX = math.max(0,v.speedX - 0.35)
-            elseif v.speedX < 0 then
-                v.speedX = math.min(0,v.speedX + 0.35)
-            end
-        else
-            if v.speedX > 0 then
-                v.speedX = math.max(0,v.speedX - 0.05)
-            elseif v.speedX < 0 then
-                v.speedX = math.min(0,v.speedX + 0.05)
-            end
-            if v:mem(0x12E,FIELD_WORD) > 0 then
-			    data.timer = 0
-			end
-        end
-    end
 end
 
 return sampleNPC
