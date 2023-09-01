@@ -99,7 +99,7 @@ function sampleNPC.onTickNPC(v)
 	or v:mem(0x136, FIELD_BOOL)        
 	or v:mem(0x138, FIELD_WORD) > 0    
 	then
-		--Handling
+		data.timer = data.timer + 1
 	end
 
 	data.timer = data.timer + 1

@@ -140,7 +140,13 @@ function sampleNPC.onTickEndNPC(v)
         
 	data.timer = data.timer + 1
 
-	if data.timer == 1 then
+	for _,z in ipairs(NPC.getIntersecting(v.x, v.y, v.x + v.width, v.y + v.height)) do
+		if Colliders.collide(z, v) and z.id == 208 then
+			data.timer = 0
+		end
+	end
+
+	if data.timer == 2 then
 	    Effect.spawn(npcID, v.x, v.y+8)
 	    NPC.spawn(90, player.x, player.y, player.section)
         v:kill(HARM_TYPE_OFFSCREEN)

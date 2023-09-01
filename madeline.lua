@@ -1197,9 +1197,14 @@ do
         sit = {1, defaultFrameY = 8},
         crouch = {2, defaultFrameY = 8},
         lie = {3, defaultFrameY = 8},
-        statue = {4, defaultFrameY = 8},
+        statue = {4,5,6,7, defaultFrameY = 8, frameDelay = 8},
 
         death = {1, defaultFrameY = 9},
+
+        holdingIdle = {1, defaultFrameY = 10},
+        holdingWalk = {1,2,3,4,5,6,7, defaultFrameY = 11,frameDelay = 5},
+        holdingJump = {1, defaultFrameY = 12},
+        holdingFall = {2,3, defaultFrameY = 12,frameDelay = 4,loops = false},
     }
 
 
@@ -1249,6 +1254,23 @@ do
 
         if data.climbing then
             return "climb",math.abs(data.climbingSpeed)
+        end
+
+        if player.holdingNPC ~= nil then
+            if not animationPal.utils.isOnGroundAnimation(player) then -- in the air/swimming
+                if player.speedY < 0 then -- rising
+                    return "holdingJump"
+                else -- falling
+                    return "holdingFall"
+                end
+            end
+
+            -- Walking
+            if player.speedX ~= 0 then
+                return "holdingWalk",math.max(0.1,math.abs(player.speedX)/3)
+            end
+
+            return "holdingIdle"
         end
 
 

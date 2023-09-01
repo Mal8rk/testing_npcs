@@ -1,7 +1,7 @@
 --NPCManager is required for setting basic NPC properties
 local npcManager = require("npcManager")
 local redirector = require("redirector")
-local flap = SFX.open(Misc.resolveSoundFile("Krow Fly.mp3"))
+local flap = Misc.resolveSoundFile("Kopter_sound")
 
 --Create the library table
 local sampleNPC = {}
@@ -86,10 +86,30 @@ npcManager.registerHarmTypes(npcID,
 
 --Register events
 function sampleNPC.onInitAPI()
-	npcManager.registerEvent(npcID, sampleNPC, "onTickNPC")
-	--npcManager.registerEvent(npcID, sampleNPC, "onTickEndNPC")
-	--npcManager.registerEvent(npcID, sampleNPC, "onDrawNPC")
-	--registerEvent(sampleNPC, "onNPCKill")
+	npcManager.registerEvent(npcID, sampleNPC, "onTickEndNPC")
+	registerEvent(sampleNPC,"onTick")
+end
+
+function sampleNPC.onTick()
+    if playSound ~= nil then
+        -- Create the looping sound effect for all of the NPC's
+        if idleSoundObj == nil then
+			if playSound == 1 then
+				if lunatime.tick() % 14 == 0 then
+					SFX.play(flap)
+				end
+			else
+				if lunatime.tick() % 18 == 0 then
+					SFX.play(flap)
+				end
+			end
+        end
+    elseif idleSoundObj ~= nil then -- If the sound is still playing but there's no NPC's, stop it
+        idleSoundObj:stop()
+        idleSoundObj = nil
+    end
+    -- Clear playSound for the next tick
+    playSound = nil
 end
 
 --Movement code taken from MegaDood's Zingers
@@ -192,7 +212,7 @@ local function variant10(v, data, settings)
 	end
 end
 
-function sampleNPC.onTickNPC(v)
+function sampleNPC.onTickEndNPC(v)
 	--Don't act during time freeze
 	if Defines.levelFreeze then return end
 	
@@ -210,6 +230,7 @@ function sampleNPC.onTickNPC(v)
 	if not data.initialized then
 		--Initialize necessary data.
 		data.initialized = true
+		data.movetimer = 0
 	end
 
 	--Depending on the NPC, these checks must be handled differently
@@ -223,11 +244,31 @@ function sampleNPC.onTickNPC(v)
 	--Execute main AI. This template just jumps when it touches the ground.
     if v.speedY < 0 then
         v.animationFrame = math.floor(lunatime.tick() / 2) % 12
-		v.animationTimer = 0
+		flapSound = nil
     elseif v.speedY > 0 then
         v.animationFrame = math.floor(lunatime.tick() / 4) % 12
-		v.animationTimer = 0
+		flapSound = 4
 	end
+	
+	if (v.x + v.width > camera.x and v.x < camera.x + 800 and v.y + v.height > camera.y and v.y < camera.y + 600) then
+		if v.speedY < 0 then
+			playSound = 1
+		else
+			playSound = 2
+		end
+	end
+
+	--Makes it so the NPC begins moving if you come back to it on variant 6 and 7 and data.timer is set to its original postion for some settings.
+	if math.abs((player.x + 0.5 * player.width) - (v.x + 0.5 * v.width))<436 then
+		data.movetimer = data.movetimer + 1
+		if data.movetimer == 1 then
+			if settings.algorithm ==5 then
+				v.speedX = settings.aspeed * v.direction
+			elseif settings.algorithm ==6 then
+				v.speedY = settings.aspeed
+			end
+		end
+	end	
 
 	if settings.algorithm == 0 then
 		variant1(v, data, settings)

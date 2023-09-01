@@ -45,6 +45,7 @@ local sampleNPCSettings = {
 
 	grabside=false,
 	grabtop=false,
+	staticdirection=true,
 
 	--Identity-related flags. Apply various vanilla AI based on the flag:
 	--iswalker = false,
@@ -136,7 +137,7 @@ function sampleNPC.onTickNPC(v)
 		--Initialize necessary data.
 		data.initialized = true
 		data.state = STATE_IDLE
-        v.data.stateTimer = 0
+        data.stateTimer = 0
 	end
 	
 	data.stateTimer = data.stateTimer + 1
@@ -185,13 +186,16 @@ function sampleNPC.onTickNPC(v)
     end
 
 	if data.state == STATE_PUSHED then
+	    if v.collidesBlockBottom then
+		    v.speedY = -3
+		end
 	    v.animationFrame = math.floor(lunatime.tick() / 8) % 1 + 3
 		v.animationTimer = 0
 		if data.stateTimer == 1 then
-            v.speedX = 3
+            v.speedX = 2
 			SFX.play("COI_Bosshit.wav")
         end
-        if data.stateTimer > 50 then
+        if data.stateTimer > 69 then
             data.state = STATE_IDLE2
 			v.speedX = 0
             v.speedY = 0

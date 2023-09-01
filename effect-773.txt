@@ -1,0 +1,5 @@
+[1]
+import = AI_SINGLE
+frames=8
+framespeed=3
+priority=-30

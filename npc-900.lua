@@ -93,7 +93,7 @@ function sampleNPC.onNPCKill(eventObj,v,reason,culprit)
 
 	if v.id ~= npcID then return end
 	Effect.spawn(npcID, v.x, v.y)
-	Effect.spawn(765, v.x+16, v.y+16)
+	Effect.spawn(78, v.x+16, v.y+16)
 	SFX.play("Redcoin.wav")
 	coinCount = coinCount + 1
 

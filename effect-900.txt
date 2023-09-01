@@ -1,5 +1,8 @@
 [1]
-speedY=-0.6
+onTick=TICK_SLOWDOWN
 frames=4
-framespeed = 3
-lifetime=42
+framespeed = 8
+lifetime=60
+speedY=-2
+xOffset=0
+yOffset=0
