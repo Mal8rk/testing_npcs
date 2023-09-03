@@ -7,18 +7,16 @@
 local npcManager = require("npcManager")
 local npcutils = require("npcs/npcutils")
 
-local yoshi
-pcall(function() yoshi = require("yiYoshi/yiYoshi") end)
+local yoshi = require("yiYoshi/yiYoshi")
 
-local ai
-pcall(function() ai = require("yiYoshi/egg_ai") end)
+local ai = require("yiYoshi/egg_ai")
 
 
 local egg = {}
 local npcID = NPC_ID
 
 
-local smokeEffectID = 952
+local smokeEffectID = npcID-1
 
 
 local eggSettings = {
@@ -71,33 +69,10 @@ npcManager.registerHarmTypes(npcID,
 )
 
 
-if ai then
-	ai.registerThrown(npcID)
+ai.registerThrown(npcID)
 
 
-	yoshi.tongueSettings.thrownEggNPCID = npcID
-end
-
---Register events
-function egg.onInitAPI()
-	npcManager.registerEvent(npcID, egg, "onTickNPC")
-end
-
-function egg.onTickNPC(v)
-	local plr = Player.getNearest(v.x + v.width/2, v.y + v.height)
-	if Colliders.collide(plr,v) and v.ai1 == 0 then
-		v.ai1 = v.ai1 + 1
-		plr.speedX = 4 * v.direction
-		v.data.speed.x = (v.data.speed.x / 2) * -1
-		v.data.speed.y = v.speedY + Defines.npc_grav
-	end
-	if v.ai1 > 0 then
-		v.ai1 = v.ai1 + 1
-		if v.ai1 >= 8 then
-			v:transform(v.data.mimicID)
-		end
-	end
-end
+yoshi.tongueSettings.thrownEggNPCID = npcID
 
 
 return egg

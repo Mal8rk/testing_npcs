@@ -361,6 +361,7 @@ function sampleNPC.onTickEndNPC(v)
 		    data.animTimer = 0
 		    v.animationFrame = 49
 	    elseif data.timer >= 1 then
+			if data.timer == 2 then v.speedY = -1.3 end
 		    data.animTimer = data.animTimer + 1
 		    v.animationFrame = math.floor(data.animTimer / 4) % 6 + 45
 		end

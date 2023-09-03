@@ -7,29 +7,46 @@
 local npcManager = require("npcManager")
 local npcutils = require("npcs/npcutils")
 
-local yoshi
-pcall(function() yoshi = require("yiYoshi/yiYoshi") end)
+local yoshi = require("yiYoshi/yiYoshi")
 
-local ai
-pcall(function() ai = require("yiYoshi/egg_ai") end)
+local ai = require("yiYoshi/egg_ai")
 
 
 local egg = {}
 local npcID = NPC_ID
 
 
-local smokeEffectID = 952
+local bounceNPCID = nil
+
+local crackEffectID = npcID+1
+local fallEffectID = npcID+2
 
 
 local eggSettings = {
 	id = npcID,
 	
+	gfxwidth = 32,
+	gfxheight = 32,
+
+	gfxoffsetx = 0,
+	gfxoffsety = 2,
+	
 	width = 32,
 	height = 32,
-
+	
+	frames = 2,
+	framestyle = 0,
+	framespeed = 8,
+	
+	speed = 1,
+	
+	npcblock = false,
+	npcblocktop = false, --Misnomer, affects whether thrown NPCs bounce off the NPC.
+	playerblock = false,
+	playerblocktop = false, --Also handles other NPCs walking atop this NPC.
 
 	nohurt = true,
-	nogravity = true,
+	nogravity = false,
 	noblockcollision = false,
 	nofireball = true,
 	noiceball = true,
@@ -44,17 +61,31 @@ local eggSettings = {
 	ignorethrownnpcs = true,
 
 
-	speed = 16,
-	luahandlesspeed = true,
+	isinteractable = true,
 
-	maxBounces = 3,
 
-	smokeEffectID = smokeEffectID,
+	bounceNPCID = bounceNPCID,
+
+	crackEffectID = crackEffectID,
+	fallEffectID = fallEffectID,
+
+
+	hitFunction = (function(v,hitNPC)
+		for i = 1,2 do
+			local star = NPC.spawn(yoshi.generalSettings.starNPCID,v.x+v.width*0.5,v.y+v.height*0.5,v.section,false,true)
+
+			star.speedX = 0
+			star.speedY = -4
+			star.direction = -math.sign(v.speedX)
+			star.ai1 = 1
+		end
+	end),
 }
 
 npcManager.setNpcSettings(eggSettings)
 npcManager.registerHarmTypes(npcID,
 	{
+		HARM_TYPE_LAVA,
 		HARM_TYPE_OFFSCREEN,
 	},
 	{
@@ -71,33 +102,7 @@ npcManager.registerHarmTypes(npcID,
 )
 
 
-if ai then
-	ai.registerThrown(npcID)
-
-
-	yoshi.tongueSettings.thrownEggNPCID = npcID
-end
-
---Register events
-function egg.onInitAPI()
-	npcManager.registerEvent(npcID, egg, "onTickNPC")
-end
-
-function egg.onTickNPC(v)
-	local plr = Player.getNearest(v.x + v.width/2, v.y + v.height)
-	if Colliders.collide(plr,v) and v.ai1 == 0 then
-		v.ai1 = v.ai1 + 1
-		plr.speedX = 4 * v.direction
-		v.data.speed.x = (v.data.speed.x / 2) * -1
-		v.data.speed.y = v.speedY + Defines.npc_grav
-	end
-	if v.ai1 > 0 then
-		v.ai1 = v.ai1 + 1
-		if v.ai1 >= 8 then
-			v:transform(v.data.mimicID)
-		end
-	end
-end
+ai.registerCollectable(npcID)
 
 
 return egg

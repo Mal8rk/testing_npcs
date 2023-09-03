@@ -1,0 +1,103 @@
+{
+	"style" : "groupbox",
+	"title" : "Bopping Toady Settings",
+	"layout": [
+		{
+			"control": "spinBox",
+			"name": "speedX",
+			"type": "double",
+			"decimals": 2,
+			"title": "Horizontal Speed",
+			"tooltip": "How fast should Toady move horizontally while jumping?",
+			"value-default": 3.2,
+			"value-min": 1,
+			"value-max": 100
+		},
+		{
+			"control": "spinBox",
+			"name": "speedY",
+			"type": "double",
+			"decimals": 2,
+			"title": "Vertical Speed",
+			"tooltip": "How high should Toady jump?",
+			"value-default": 4.5,
+			"value-min": 1,
+			"value-max": 20
+		},
+		{
+			"control": "spinBox",
+			"name": "maxHops",
+			"type": "int",
+			"title": "Max Hops",
+			"tooltip": "How many hops will Toady do before turning around? 0 for infinite.",
+			"value-default": 99,
+			"value-min": 0,
+			"value-max": 99
+		},
+		{
+			"control": "spinBox",
+			"name": "hopCooldown",
+			"type": "int",
+			"title": "Hop Cooldown",
+			"tooltip": "How many ticks will Toady wait before jumping again?",
+			"value-default": 10,
+			"value-min": 0,
+			"value-max": 9999
+		},
+		{
+			"control": "spinBox",
+			"name": "lickRange",
+			"type": "int",
+			"title": "Lick Range",
+			"tooltip": "How close should the player be for Toady to lick?\n32 is one tile, 64 is two tiles etc.",
+			"value-default": 0,
+			"value-min": 0,
+			"value-max": 9999
+		},
+		{
+			"control": "spinBox",
+			"name": "tongueRange",
+			"type": "int",
+			"title": "Tongue Range",
+			"tooltip": "How far should Toady's tongue reach?\n32 is one tile, 64 is two tiles etc.",
+			"value-default": 0,
+			"value-min": 1,
+			"value-max": 9999
+		},
+		{
+			"control": "spinBox",
+			"name": "tongueCooldown",
+			"type": "int",
+			"title": "Lick Cooldown",
+			"tooltip": "How many ticks will Toady wait before licking?",
+			"value-default": 9999,
+			"value-min": 0,
+			"value-max": 9999
+		},
+		{
+			"control": "spinBox",
+			"name": "tongueSpeed",
+			"type": "double",
+			"decimals": 2,
+			"title": "Lick Speed",
+			"tooltip": "How fast should Toady lick?\nActs as a multiplier.",
+			"value-default": 3,
+			"value-min": 0.1,
+			"value-max": 100
+		},
+		{
+			"control": "checkBox",
+			"name": "alwaysLick",
+			"title": "Always Lick",
+			"tooltip": "Should Toady always lick after a jump, even if there is no player near it?",
+			"value-default": false
+		},
+		{
+			"control": "checkBox",
+			"name": "segmentedLick",
+			"title": "Segmented Tongue",
+			"tooltip": "Should Toady's tongue extend segmented or smoothly?\nChecked is segmented, unchecked is smoothly.\nMay look weird on slower speeds.",
+			"value-default": false
+		}
+	]
+}
