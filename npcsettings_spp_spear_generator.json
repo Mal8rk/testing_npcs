@@ -1,0 +1,43 @@
+{
+	"style" : "groupbox",
+	"title" : "Spear Generator Settings",
+	"layout": [
+	
+		{
+			"control" : "group",
+			"title" : "",
+			"name" : "..",
+			"children": [
+			{
+			        "control": "combobox",
+			        "name": "length",
+			        "title": "Spear Length:",
+			        "elements": ["Short", "Long"],
+			        "value-default": 0
+			},
+			{
+				"control": "spinBox",
+				"type": "double",
+				"name": "xspeed",
+				"title": "Horizontal (X) Speed",
+				"tooltip": "How fast the spear's gonna travel.",
+				"value-default": 2,
+				"value-min": 0.1,
+				"value-max": 99,
+				"single-step": 0.5
+			},
+			{
+			        "control": "spinBox",
+			        "type": "int",
+			        "name": "resttime",
+			        "title": "Rest Time",
+			        "tooltip": "Time before it prepares to throw a spear.",
+			        "value-default": 96,
+			        "value-min": 1,
+			        "value-max": 1000,
+			        "single-step": 1
+			}
+			]
+	         }
+         ]
+}

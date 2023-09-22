@@ -1,4 +1,5 @@
 local npcManager = require("npcManager")
+local effectconfig = require("game/effectconfig")
 local npcutils = require("npcs/npcutils")
 
 local sampleNPC = {}
@@ -75,8 +76,9 @@ npcManager.registerHarmTypes(npcID,
 );
 
 local STATE_WALK = 0
-local STATE_CATCHNTHROW = 1
-local STATE_BONKED = 2
+local STATE_CATCH = 1
+local STATE_THROW = 2
+local STATE_BONKED = 3
 
 function sampleNPC.onInitAPI()
 	npcManager.registerEvent(npcID, sampleNPC, "onTickEndNPC")
@@ -119,6 +121,7 @@ function sampleNPC.onTickEndNPC(v)
 	
 	if v.despawnTimer <= 0 then
 		data.initialized = false
+		data.npc = nil
 		return
 	end
 
@@ -126,7 +129,7 @@ function sampleNPC.onTickEndNPC(v)
 		data.initialized = true
 		data.state = STATE_WALK
 		data.timer = data.timer or 0
-		data.throwTimer = 0
+		data.npc = nil
 		data.animTimer = 0
 		data.turnTimer = 0
 		data.health = 3
@@ -142,7 +145,12 @@ function sampleNPC.onTickEndNPC(v)
 	data.timer = data.timer + 1
 	data.animTimer = data.animTimer + 1
 
-	local npcs = Colliders.getColliding{a = v,btype = Colliders.NPC}
+    data.hasCollided = false
+    for _, npc in NPC.iterateIntersecting(v.x, v.y, v.x + v.width, v.y + v.height) do
+        if npc ~= v and NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop and not npc:mem(0x12C, FIELD_WORD) > 0 then
+            data.hasCollided = true
+        end
+    end
 
 	--Most of this is just for animation
 
@@ -157,70 +165,82 @@ function sampleNPC.onTickEndNPC(v)
 		    v.direction = -v.direction
 			data.turnTimer = 0
 	    end
-		for _,npc in ipairs(npcs) do
-			if Colliders.collide(npc, v) and not v.friendly and not Defines.cheat_donthurtme and NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop then
-				data.state = STATE_CATCHNTHROW
-				data.timer = 0
-				data.animTimer = 0
-				data.turnTimer = 0
-				data.throwTimer = data.throwTimer + 1
-	
-				if npc.x <= v.x then
-					v.direction = -1
-				else
-					v.direction = 1
-				end
-	            
-				if data.throwTimer == 104 then
-					data.projectile = NPC.spawn(npc.id, v.x, v.y, player.section)
-					if data.throwTimer >= 105 then
-						data.projectile.speedX = 6 * v.direction
-					end
-				end
-
-				npc:kill(HARM_TYPE_VANISH)
-				v.speedX = 0
-			end
-		end
-	elseif data.state == STATE_CATCHNTHROW then
-		if data.timer >= 150 then
-		    data.state = STATE_WALK
+		if data.hasCollided then
+			data.state = STATE_CATCH
 			data.timer = 0
 			data.animTimer = 0
 			data.turnTimer = 0
-			Defines.npc_grav = 0.26
-		elseif data.timer >= 143 then
-		    v.animationFrame = 26
-		elseif data.timer >= 120 then
-		    v.animationFrame = math.floor(data.animTimer / 6) % 5 + 22
-		elseif data.timer == 119 then
-		    v.animationFrame = 21
+			v.speedX = 0
+		end
+	elseif data.state == STATE_CATCH then
+		for _, npc in NPC.iterateIntersecting(v.x, v.y, v.x + v.width, v.y + v.height) do
+			if data.hasCollided and npc ~= v and NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop then
+				if data.timer >= 88 then
+					npc.animationFrame = 1
+					npc.speedY = -Defines.npc_grav + -1.9
+					npc.speedX = 14 * v.direction
+					npc.x = v.x + 32 * v.direction
+				elseif data.timer == 87 then
+					v.animationFrame = 16
+					data.animTimer = 0
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				elseif data.timer >= 48 then
+					SFX.play("Aim.wav")
+					v.animationFrame = math.floor(data.animTimer / 5) % 4 + 12
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				elseif data.timer >= 32 then
+					if data.timer == 32 then v.x = v.x - 10 * v.direction elseif data.timer == 43 then v.x = v.x - 11 * v.direction end
+					SFX.play("Aim.wav")
+					v.animationFrame = math.floor(data.animTimer / 6) % 3 + 9
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				elseif data.timer == 31 then
+					v.animationFrame = 8
+					data.animTimer = 0
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				elseif data.timer >= 16 then
+					v.animationFrame = 8
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				elseif data.timer >= 1 then
+					v.animationFrame = math.floor(data.animTimer / 5) % 4 + 5
+					npc.animationFrame = -50
+					npc.x = v.x
+					npc.y = v.y
+				end
+			elseif not data.hasCollided then
+				data.state = STATE_THROW
+				data.timer = 0
+				data.animTimer = 0
+				data.turnTimer = 0
+			end
+		end
+	elseif data.state == STATE_THROW then
+		if data.timer >= 61 then
+			data.state = STATE_WALK
+			data.timer = 0
 			data.animTimer = 0
-		elseif data.timer >= 108 then
-		    v.animationFrame = 21
-		elseif data.timer >= 88 then
-			if data.timer == 92 then v.x = v.x + 20 * v.direction end
-		    v.animationFrame = math.floor(data.animTimer / 5) % 6 + 16
-		elseif data.timer == 87 then
-			Defines.npc_grav = 0
-		    v.animationFrame = 16
+			data.turnTimer = 0
+		elseif data.timer >= 56 then
+			v.animationFrame = 26
+		elseif data.timer >= 33 then
+			v.animationFrame = math.floor(data.animTimer / 6) % 5 + 22
+		elseif data.timer == 32 then
+			v.animationFrame = 21
 			data.animTimer = 0
-		elseif data.timer >= 48 then
-			Defines.npc_grav = 0
-			SFX.play("Aim.wav")
-		    v.animationFrame = math.floor(data.animTimer / 5) % 4 + 12
-		elseif data.timer >= 32 then
-			if data.timer == 32 then v.x = v.x - 10 * v.direction elseif data.timer == 43 then v.x = v.x - 11 * v.direction end
-			SFX.play("Aim.wav")
-		    v.animationFrame = math.floor(data.animTimer / 6) % 3 + 9
-			Defines.npc_grav = 0
-		elseif data.timer == 31 then
-		    v.animationFrame = 8
-			data.animTimer = 0
-		elseif data.timer >= 16 then
-		    v.animationFrame = 8
-	    elseif data.timer >= 1 then
-		    v.animationFrame = math.floor(data.animTimer / 5) % 4 + 5
+		elseif data.timer >= 21 then
+			v.animationFrame = 21
+		elseif data.timer >= 1 then
+			if data.timer == 5 then v.x = v.x + 20 * v.direction end
+			v.animationFrame = math.floor(data.animTimer / 5) % 6 + 16
 		end
 	elseif data.state == STATE_BONKED then
 		if data.timer >= 205 then
@@ -273,7 +293,6 @@ function sampleNPC.onNPCHarm(eventObj, v, reason, culprit)
 			data.animTimer = 0
 			SFX.play("Shoop.wav")
 			v.speedX = 0
-			Defines.npc_grav = 0.26
 		end
     end
 	if data.health <= 0 then
@@ -292,7 +311,7 @@ end
 function sampleNPC.onDrawNPC(v)
 	local data = v.data
 	Text.print(data.timer, 8, 8)
-	Text.print(data.timer, 8, 32)
+	Text.print(data.hasCollided, 8, 32)
 end
 
 return sampleNPC

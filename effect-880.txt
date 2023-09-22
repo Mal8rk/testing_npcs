@@ -1,0 +1,11 @@
+[1]
+import=AI_ARC
+gravity=0.28
+lifetime=500
+frames=1
+framestyle=1
+framespeed=8
+priority=FOREGROUND
+xAlign=MID
+yAlign=MID
+rotation=14
