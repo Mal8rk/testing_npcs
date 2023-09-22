@@ -1,0 +1,14 @@
+{
+	"style" : "groupbox",
+	"title" : "Grunt Settings",
+	"layout": [
+	
+		{
+			"control": "combobox",
+			"name": "type",
+			"title": "Grunt Type:",
+			"elements": ["Walker", "Runner"],
+			"value-default": 0
+	         }
+         ]
+}

@@ -7,9 +7,11 @@
 local npcManager = require("npcManager")
 local npcutils = require("npcs/npcutils")
 
-local yoshi = require("yiYoshi/yiYoshi")
+local yoshi
+pcall(function() yoshi = require("yiYoshi/yiYoshi") end)
 
-local ai = require("yiYoshi/egg_ai")
+local ai
+pcall(function() ai = require("yiYoshi/egg_ai") end)
 
 
 local egg = {}
@@ -69,10 +71,12 @@ npcManager.registerHarmTypes(npcID,
 )
 
 
-ai.registerThrown(npcID)
+if ai then
+	ai.registerThrown(npcID)
 
 
-yoshi.tongueSettings.thrownEggNPCID = npcID
+	yoshi.tongueSettings.thrownEggNPCID = npcID
+end
 
 --Register events
 function egg.onInitAPI()
