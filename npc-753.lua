@@ -15,19 +15,19 @@ local ai = require("spike_ai")
 local spike = {}
 local npcID = NPC_ID
 
-local deathEffectID = (npcID)
+local deathEffectID = (npcID-1)
 
 local throwID = (npcID+1)
 
 local spikeSettings = {
 	id = npcID,
 	
-	gfxwidth = 36,
-	gfxheight = 34,
+	gfxwidth = 72,
+	gfxheight = 68,
 	gfxoffsetx = 0,
 	gfxoffsety = 2,
-	width = 32,
-	height = 32,
+	width = 64,
+	height = 64,
 	
 	frames = 5,
 	idleFrames = 2,
@@ -53,7 +53,7 @@ local spikeSettings = {
 	harmlessgrab = false,
 	harmlessthrown = false,
 
-	isheavy = false,
+	isheavy = true,
 
 	idleTime = 96, -- How long the spike is idle before spawning a ball.
 	holdTime = 32, -- How long the spike ball is held before throwing it.

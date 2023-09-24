@@ -44,7 +44,7 @@ local sampleNPCSettings = {
 	grabside=false,
 	grabtop=false,
 	staticdirection=true,
-	destroyblocktable = {90, 4, 188, 60, 293, 667, 457, 666, 686, 668, 526, 694}
+	destroyblocktable = {90, 4, 115, 188, 60, 226, 293, 667, 457, 666, 686, 668, 526, 694}
 }
 
 npcManager.setNpcSettings(sampleNPCSettings)
