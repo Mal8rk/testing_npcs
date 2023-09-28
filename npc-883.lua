@@ -98,6 +98,8 @@ function sampleNPC.onTickEndNPC(v)
 
 	if not data.initialized then
 		data.initialized = true
+		data.chasebox = Colliders.Box(0, 0, 1, 1)
+		data.slambox = Colliders.Box(0, 0, 1, 1)
 		data.attackCollider = data.attackCollider or Colliders.Box(v.x, v.y, v.width, v.height)
 		data.hitBlockCollider = data.hitBlockCollider or Colliders.Box(v.x, v.y, v.width, v.height)
 		data.state = data.state or STATE_IDLE
@@ -113,6 +115,18 @@ function sampleNPC.onTickEndNPC(v)
 		return
 	end
 
+	data.chasebox.width = v.width + 96
+	data.chasebox.height = v.height + 300
+
+	data.chasebox.x = v.x - 48
+	data.chasebox.y = v.y - 300
+
+	data.slambox.width = v.width
+	data.slambox.height = v.height + 300
+
+	data.slambox.x = v.x
+	data.slambox.y = v.y - 300
+
 	data.attackCollider.x = v.x
 	data.attackCollider.y = v.y - 1
 
@@ -124,34 +138,35 @@ function sampleNPC.onTickEndNPC(v)
 	if data.state == STATE_IDLE then
 		v.animationFrame = 0
 		v.speedX = 0.9 * v.direction
+		v.speedY = 0
 
 		if v.collidesBlockLeft or v.collidesBlockRight then
 			v.direction = -v.direction
 		end
 
-		if math.abs(player.x - v.x) <= 128 and player.y < v.y + v.height + 4 then
+		if Colliders.collide(player, data.chasebox) then
 			npcutils.faceNearestPlayer(v)
 			data.state = STATE_CHASE
 			data.timer = 0
 		end
 	elseif data.state == STATE_CHASE then
-		v.animationFrame = 1
-		v.speedX = 2 * v.direction
-
-		if math.abs(player.x - v.x) <= 64 and player.y < v.y + v.height + 4 then
-			data.state = STATE_DROP
+		if Colliders.collide(player, data.chasebox) then
+			v.animationFrame = 1
+			v.speedX = 2 * v.direction
+		else
+			data.state = STATE_IDLE
 			data.timer = 0
 		end
 
-		if math.abs(player.x - v.x) >= 128 and player.y < v.y + v.height + 4 then
-			data.state = STATE_IDLE
+		if Colliders.collide(player, data.slambox) then
+			data.state = STATE_DROP
 			data.timer = 0
 		end
 	elseif data.state == STATE_DROP then
 		v.speedX = 0
 		if data.timer > 32 then
 			v.animationFrame = 3
-			v.speedY = math.clamp(v.speedY + .25, -20, 20)
+			v.speedY = math.clamp(v.speedY + -.25, -20, 20)
 	    elseif data.timer >= 24 then
 			v.animationFrame = 3
 			data.shake = 0
@@ -219,16 +234,16 @@ function sampleNPC.onTickEndNPC(v)
 			b:hit(true)
 		end
 
-		if v.collidesBlockBottom then
+		if v.collidesBlockUp then
 			data.state = STATE_RISE
 			data.timer = 0
 		end
 	elseif data.state == STATE_RISE then
 	    if data.timer > 48 then
-			v.speedY = -2
+			v.speedY = 2
 			v.animationFrame = 2
 
-			if v.y <= v.spawnY then
+			if v.y >= v.spawnY - 1 then
 				data.state = STATE_IDLE
 				data.timer = 0
 				v.speedY = 0
@@ -239,8 +254,8 @@ function sampleNPC.onTickEndNPC(v)
 			if data.timer == 1 then
 				Defines.earthquake = 4
 				SFX.play(37)
-				Animation.spawn(10, v.x - 17, v.y + v.height - 16)
-				Animation.spawn(10, v.x + v.width - 15, v.y + v.height - 16)
+				Animation.spawn(10, v.x - 17, v.y + v.height - 72)
+				Animation.spawn(10, v.x + v.width - 15, v.y + v.height - 72)
 			end
 		end
 	end
