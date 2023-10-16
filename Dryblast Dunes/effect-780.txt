@@ -1,0 +1,8 @@
+[1]
+frames=10
+framespeed=4
+framestyle=0
+lifetime=40
+priority=1
+xOffset=-65
+yOffset=-65

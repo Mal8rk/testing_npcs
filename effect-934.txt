@@ -1,0 +1,5 @@
+[1]
+lifetime=100
+frames=1
+framespeed=2
+priority=-54

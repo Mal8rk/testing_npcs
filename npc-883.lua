@@ -237,6 +237,7 @@ function sampleNPC.onTickEndNPC(v)
 		if v.collidesBlockUp then
 			data.state = STATE_RISE
 			data.timer = 0
+			v.speedY = 0
 		end
 	elseif data.state == STATE_RISE then
 	    if data.timer > 48 then

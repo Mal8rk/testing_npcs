@@ -1,0 +1,7 @@
+fill-color = #B8A898
+
+[Backdrop]
+depth=100
+alignY=BOTTOM
+img="background2-23.png"
+repeatX=true
