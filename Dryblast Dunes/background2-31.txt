@@ -1,0 +1,8 @@
+fill-color = #E05870
+
+[Backdrop]
+depth=500
+alignY=BOTTOM
+img="background2-31.png"
+repeatX=true
+repeatY=false

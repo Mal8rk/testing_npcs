@@ -184,10 +184,10 @@ function sampleNPC.onTickEndNPC(v)
 			end
 			if settings.list == 1 then
 				local bomb = NPC.spawn(835, v.x + spawnOffset[v.direction], v.y + 6, player.section, false)
-				bomb.speedX = 2.8 * v.direction
+				bomb.speedX = settings.speed * v.direction
 			else
 				local barrel = NPC.spawn(834, v.x + spawnOffset[v.direction], v.y, player.section, false)
-				barrel.speedX = 2.8 * v.direction
+				barrel.speedX = settings.speed * v.direction
 			end
 			Effect.spawn(760, v.x + spawnOffset[v.direction], v.y)
 		elseif data.shootTimer > 3 and data.shootTimer <= 5 then

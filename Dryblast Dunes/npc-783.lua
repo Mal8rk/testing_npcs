@@ -143,11 +143,11 @@ function sampleNPC.onTickNPC(v)
 		    SFX.play("Barrel_blast.mp3")
 			if settings.list == 1 then
 				local bomb = NPC.spawn(835, v.x + spawnOffset[v.direction], v.y - 46, player.section, false)
-				bomb.speedY = -2.8
+				bomb.speedY = -settings.speed
 				bomb.direction = v.direction
 			else
 				local barrel = NPC.spawn(834, v.x + spawnOffset[v.direction], v.y - 32, player.section, false)
-				barrel.speedY = -2.8
+				barrel.speedY = -settings.speed
 				barrel.direction = v.direction
 			end
 			Effect.spawn(760, v.x + spawnOffset[v.direction], v.y - 32)

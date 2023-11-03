@@ -5,7 +5,7 @@ function sz.onInitAPI()
     registerEvent(sz, "onTick")
 end
  
-sz.block = 27
+sz.block = 952
  
 function sz.onTick()
     for k,v in ipairs(Block.getIntersecting(player.x, player.y, player.x + player.width, player.y + player.height)) do

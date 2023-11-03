@@ -2,6 +2,8 @@ local animationPal = require("animationPal")
 local cutscenePal = require("cutscenePal")
 
 local minHUD = require("minHUD")
+local warpTransition = require("warpTransition")
+local respawnRooms = require("respawnRooms")
 
 local intro = cutscenePal.newScene("intro")
 
@@ -12,7 +14,10 @@ intro.disablesHUD = false
 function onStart()
 	Player.setCostume(CHARACTER_MARIO, "SMW-Mario")
 	player.powerup = PLAYER_BIG
-	intro:start()
+
+	if not Checkpoint.getActive() then
+		intro:start()
+	end
 end
 
 local function spawnBarrelActor(x,y)

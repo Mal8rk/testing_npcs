@@ -1,7 +1,7 @@
 fill-color = #88A8D0
 
 [Backdrop]
-depth=100
+depth=700
 alignY=BOTTOM
 img="background2-14.png"
 repeatX=true

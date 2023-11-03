@@ -1,7 +1,7 @@
-fill-color = #B8A898
+fill-color = #C86850
 
 [Backdrop]
-depth=100
+depth=700
 alignY=BOTTOM
 img="background2-23.png"
 repeatX=true
