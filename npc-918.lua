@@ -44,6 +44,12 @@ local sampleNPCSettings = {
 
 	grabside=false,
 	grabtop=false,
+
+	prepareDetectionWidth = 64,
+	prepareDetectionHeight = 64,
+	YIEggID = 953,
+	enemyEggID = 922,
+	cursorEffect = 825,
 }
 
 npcManager.setNpcSettings(sampleNPCSettings)
@@ -82,12 +88,14 @@ local STATE_BONKED = 3
 
 function sampleNPC.onInitAPI()
 	npcManager.registerEvent(npcID, sampleNPC, "onTickEndNPC")
-	npcManager.registerEvent(npcID, sampleNPC, "onDrawNPC")
+	--npcManager.registerEvent(npcID, sampleNPC, "onDrawNPC")
 	registerEvent(sampleNPC, "onNPCHarm")
 end
 
 local egg
 pcall(function() yiYoshi = require("yiYoshi/egg_ai") end)
+
+local colBox = Colliders.Box(0,0,0,0)
 
 function isNearPit(v)
 	--This function either returns false, or returns the direction the npc should go to. numbers can still be used as booleans.
@@ -112,12 +120,19 @@ function isNearPit(v)
 	return true
 end
 
+function effectconfig.onTick.TICK_CROSSHAIR(v)
+	local plr = Player.getNearest(v.x + v.width/2, v.y + v.height)
+    v.x = plr.x
+	v.y = plr.y
+end
+
 function sampleNPC.onTickEndNPC(v)
 
 	if Defines.levelFreeze then return end
 	
 	local data = v.data
 	local config = NPC.config[v.id]
+	local plr = Player.getNearest(v.x + v.width/2, v.y + v.height)
 	
 	if v.despawnTimer <= 0 then
 		data.initialized = false
@@ -142,13 +157,37 @@ function sampleNPC.onTickEndNPC(v)
 		--Handling
 	end
 
+	colBox.width = config.prepareDetectionWidth
+	colBox.height = config.prepareDetectionHeight
+	
+	colBox.x = v.x - 16
+	colBox.y = v.y + v.height - colBox.height
+
+	colBox:Debug(false)
+
 	data.timer = data.timer + 1
 	data.animTimer = data.animTimer + 1
 
     data.hasCollided = false
-    for _, npc in NPC.iterateIntersecting(v.x, v.y, v.x + v.width, v.y + v.height) do
-        if npc ~= v and NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop and not npc:mem(0x12C, FIELD_WORD) > 0 then
+    for _, npc in NPC.iterateIntersecting(colBox.x, colBox.y, colBox.x + colBox.width, colBox.y + colBox.height) do
+        if (NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop or NPC.config[npc.id].isshell or (NPC.config[npc.id].fallEffectID and not NPC.config[npc.id].isBigEgg or npc.id == NPC.config[v.id].YIEggID)) and npc:mem(0x12C, FIELD_WORD) == 0 then
             data.hasCollided = true
+			
+			if NPC.config[npc.id].fallEffectID then
+				data.transformEgg = true
+			else
+				--Transform thrown yi eggs into the version that bumps players when touched
+				if npc.id == NPC.config[v.id].YIEggID then 
+					npc:transform(954)
+				else
+					npc.friendly = true
+				end
+				
+				if not NPC.config[npc.id].isshell then
+					npc.ai1 = 1
+				end
+			end
+			data.thrownNPC = npc
         end
     end
 
@@ -173,55 +212,88 @@ function sampleNPC.onTickEndNPC(v)
 			v.speedX = 0
 		end
 	elseif data.state == STATE_CATCH then
-		for _, npc in NPC.iterateIntersecting(v.x, v.y, v.x + v.width, v.y + v.height) do
-			if data.hasCollided and npc ~= v and NPC.config[npc.id].grabside or NPC.config[npc.id].grabtop then
-				if data.timer >= 88 then
-					npc.animationFrame = 1
-					npc.speedY = -Defines.npc_grav + -1.9
-					npc.speedX = 14 * v.direction
-					npc.x = v.x + 32 * v.direction
-				elseif data.timer == 87 then
-					v.animationFrame = 16
-					data.animTimer = 0
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
-				elseif data.timer >= 48 then
-					SFX.play("Aim.wav")
-					v.animationFrame = math.floor(data.animTimer / 5) % 4 + 12
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
-				elseif data.timer >= 32 then
-					if data.timer == 32 then v.x = v.x - 10 * v.direction elseif data.timer == 43 then v.x = v.x - 11 * v.direction end
-					SFX.play("Aim.wav")
-					v.animationFrame = math.floor(data.animTimer / 6) % 3 + 9
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
-				elseif data.timer == 31 then
-					v.animationFrame = 8
-					data.animTimer = 0
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
-				elseif data.timer >= 16 then
-					v.animationFrame = 8
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
-				elseif data.timer >= 1 then
-					v.animationFrame = math.floor(data.animTimer / 5) % 4 + 5
-					npc.animationFrame = -50
-					npc.x = v.x
-					npc.y = v.y
+		npcutils.faceNearestPlayer(v)
+		if data.hasCollided and data.thrownNPC then
+			if data.timer >= 88 then
+				
+				--Throw the YI egg here
+				if data.transformEgg then 
+					data.thrownNPC:transform(NPC.config[v.id].enemyEggID)
+					data.dirVectr = vector.v2(
+						(plr.x) - (v.x + v.width * 0.5),
+						(plr.y) - (v.y + v.height * 0.5)
+					):normalize() * 14
+					if data.thrownNPC.data.speed then
+						data.thrownNPC.data.speed.x = 14 * v.direction
+						data.thrownNPC.data.speed.y = -Defines.npc_grav + data.dirVectr.y
+					end
+				else
+					data.thrownNPC:mem(0x136, FIELD_BOOL, true)
+					data.thrownNPC.friendly = false
 				end
-			elseif not data.hasCollided then
-				data.state = STATE_THROW
-				data.timer = 0
+				
+				data.dirVectr = vector.v2(
+					(plr.x) - (v.x + v.width * 0.5),
+					(plr.y) - (v.y + v.height * 0.5)
+				):normalize() * 14
+
+				data.thrownNPC.x = v.x + 32 * v.direction
+				data.thrownNPC.speedX = data.dirVectr.x
+				data.thrownNPC.speedY = data.dirVectr.y
+				v.animationFrame = 16
+				
+				data.thrownNPC = nil
+				
+			elseif data.timer == 87 then
+				v.animationFrame = 16
 				data.animTimer = 0
-				data.turnTimer = 0
+				data.thrownNPC.animationFrame = 0
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
+				SFX.play("egg_thrown.ogg")
+			elseif data.timer >= 48 then
+				SFX.play("Aim.wav")
+				v.animationFrame = math.floor(data.animTimer / 5) % 4 + 12
+				data.thrownNPC.animationFrame = -50
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
+			elseif data.timer >= 32 then
+			
+				if data.timer == 32 then 
+					v.x = v.x - 10 * v.direction 
+					Effect.spawn(NPC.config[v.id].cursorEffect, v.x, v.y, player.section, true) 
+				elseif data.timer == 43 then 
+					v.x = v.x - 11 * v.direction 
+				end
+				
+				SFX.play("Aim.wav")
+				
+				v.animationFrame = math.floor(data.animTimer / 6) % 3 + 9
+				data.thrownNPC.animationFrame = -50
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
+			elseif data.timer == 31 then
+				v.animationFrame = 8
+				data.animTimer = 0
+				data.thrownNPC.animationFrame = -50
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
+			elseif data.timer >= 16 then
+				v.animationFrame = 8
+				data.thrownNPC.animationFrame = -50
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
+			elseif data.timer >= 1 then
+				v.animationFrame = math.floor(data.animTimer / 5) % 4 + 5
+				data.thrownNPC.animationFrame = -50
+				data.thrownNPC.x = v.x
+				data.thrownNPC.y = v.y
 			end
+		elseif not data.hasCollided then
+			data.state = STATE_THROW
+			data.timer = 0
+			data.animTimer = 0
+			data.turnTimer = 0
 		end
 	elseif data.state == STATE_THROW then
 		if data.timer >= 61 then
@@ -243,6 +315,16 @@ function sampleNPC.onTickEndNPC(v)
 			v.animationFrame = math.floor(data.animTimer / 5) % 6 + 16
 		end
 	elseif data.state == STATE_BONKED then
+	
+		if data.hasCollided then
+			data.hasCollided = false
+			data.thrownNPC.friendly = false
+			if data.timer == 1 then
+				data.thrownNPC.animationFrame = 0
+				data.thrownNPC = nil
+			end
+		end
+		
 		if data.timer >= 205 then
 		    data.state = STATE_WALK
 			data.timer = 0
@@ -308,10 +390,10 @@ function sampleNPC.onNPCHarm(eventObj, v, reason, culprit)
 	end
 end
 
-function sampleNPC.onDrawNPC(v)
+--[[function sampleNPC.onDrawNPC(v)
 	local data = v.data
-	Text.print(data.timer, 8, 8)
+	Text.print(data.thrownNPC, 8, 8)
 	Text.print(data.hasCollided, 8, 32)
-end
+end]]
 
 return sampleNPC

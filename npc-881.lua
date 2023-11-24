@@ -130,8 +130,7 @@ function sampleNPC.onTickEndNPC(v)
 		    v.animationFrame = math.floor(data.timer / 5) % 2 + 5
 
 			if lunatime.tick() % 5 == 0 then
-				Effect.spawn(10, v.x+42, v.y+38, player.section)
-				Effect.spawn(10, v.x+10, v.y+38, player.section)
+				Effect.spawn(764, v.x-24, v.y+30, player.section)
 				SFX.play("Rockpush.wav")
 			end
 		elseif data.timer >= 1 then

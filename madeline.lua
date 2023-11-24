@@ -521,57 +521,11 @@ do
     end
 
 
-    local function getMaxDashes()
-        return madeline.dashSettings.maxDashes[player.powerup] or madeline.dashSettings.maxDashes[PLAYER_BIG] or 1
-    end
-
-
-    function madeline.refillDashes(amount)
-        if data.currentDashes == nil then
-            return
-        end
-
-        amount = amount or getMaxDashes()
-
-        if amount <= data.currentDashes then
-            return false
-        end
-
-        data.hairFlashTimer = madeline.dashSettings.hairFlashTime
-        data.currentDashes = amount
-
-        return true
-    end
-
-
     function canDash()
         return (
             true
         )
     end
-
-    function resetDashState()
-        data.dashTimer = 0
-
-        data.dashDirection = vector.zero2
-        data.dashCooldown = 0
-
-        data.dashAfterimageColor = nil
-
-        data.hairFlashTimer = data.hairFlashTimer or 0
-
-        if dreamBlock == nil or dreamBlock.playerData.state ~= dreamBlock.STATE.ACTIVE then
-            local maxDashes = getMaxDashes()
-
-            if data.currentDashes ~= nil and data.currentDashes < maxDashes then
-                data.hairFlashTimer = madeline.dashSettings.hairFlashTime
-            end
-
-            data.currentDashes = maxDashes
-        end
-    end
-
-    madeline.resetDashState = resetDashState
 
 
     function handleDash()
@@ -925,11 +879,6 @@ do
     end
 
 
-    function madeline.refillStamina(amount)
-        data.climbingStamina = math.max(data.climbingStamina,amount or madeline.climbingSettings.maxStamina)
-    end
-
-
     function canClimb()
         return (
             not player:mem(0x36,FIELD_BOOL) -- underwater
@@ -1229,7 +1178,7 @@ do
             local direction = animationPal.utils.getPipeDirection(player)
 
             if direction == 2 or direction == 4 then
-                return "walk",0.5
+                return "walk",1
             else
                 return "idle"
             end
@@ -1267,7 +1216,7 @@ do
 
             -- Walking
             if player.speedX ~= 0 then
-                return "holdingWalk",math.max(0.1,math.abs(player.speedX)/3)
+                return "holdingWalk",math.max(1,math.abs(player.speedX)/3)
             end
 
             return "holdingIdle"
@@ -1276,7 +1225,7 @@ do
 
         if animationPal.utils.isOnGroundAnimation(player) then
             if player.speedX ~= 0 then
-                return "walk",math.max(0.1,math.abs(player.speedX)/3)
+                return "walk",math.max(1,math.abs(player.speedX)/3)
             end
 
             if player.keys.up then
@@ -1367,39 +1316,6 @@ do
     end
 
 
-    function madeline.preDrawFunc(_,properties)
-        if properties.mount == MOUNT_BOOT then
-            properties.y = properties.y + madeline.generalSettings.bootOffsetX*properties.direction
-            properties.y = properties.y + madeline.generalSettings.bootOffsetY
-        end
-
-        if not properties.renderArgs.ignorestate then
-            local blinkingSpeed = madeline.climbingSettings.dangerBlinkingSpeed
-
-            if data.deathState ~= DEATH_STATE.INACTIVE then
-                properties.x = properties.x + data.deathOffset.x
-                properties.y = properties.y + data.deathOffset.y
-            end
-
-            if data.climbingStamina <= madeline.climbingSettings.dangerStamina and lunatime.tick()%(blinkingSpeed*2) < blinkingSpeed then
-                properties.color = madeline.climbingSettings.dangerBlinkingColor
-            end
-        end
-
-        if properties.shader == nil then
-            properties.shader = mainShader
-            properties.uniforms = {
-                paletteImage = paletteImage,
-                currentPalette = getPalette(properties),
-
-                tintColor = properties.color,
-            }
-
-            properties.color = Color.white
-        end
-    end
-
-
     animationPal.registerCharacter(CHARACTER_MADELINE,{
         imageDirection = DIR_RIGHT,
 
@@ -1422,9 +1338,6 @@ end
 
 
 local function resetState()
-    resetDashState()
-    resetClimbingState()
-    resetWallJumpState()
 
     -- General state stuff
     if data.pauseTime ~= nil and data.pauseTime > 0 then
@@ -1478,7 +1391,6 @@ end
 
 
 function madeline.onInitAPI()
-    dreamBlock = require("dreamBlock_ai")
     
     registerEvent(madeline,"onTick","onTickPlayer")
     registerEvent(madeline,"onDraw","onDrawPlayer")
@@ -1503,8 +1415,6 @@ function madeline.onTickPlayer()
     end
 
     applyBootFix()
-
-    data.hairFlashTimer = math.max(0,data.hairFlashTimer - 1)
     
     handleDeath()
 
@@ -1539,11 +1449,6 @@ function madeline.onTickPlayer()
             player.speedX = Defines.player_runspeed*0.93*math.sign(player.speedX)
         end
     end
-
-
-    handleClimbing()
-    handleWallJump()
-    handleDash()
 
 
     player:mem(0x120,FIELD_BOOL,false) -- stop jumping with the spin jump key
@@ -1664,7 +1569,6 @@ function madeline.onPostReset(fromRespawn)
             player.forcedTimer = 0
         end
     else
-        madeline.refillDashes()
         madeline.refillStamina()
     end
 end

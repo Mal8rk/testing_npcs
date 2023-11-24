@@ -1,0 +1,7 @@
+[1]
+onTick=TICK_CROSSHAIR
+framestyle=0
+frames=2
+framespeed=4
+lifetime=64
+priority=12

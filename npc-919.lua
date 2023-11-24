@@ -47,6 +47,7 @@ local sampleNPCSettings = {
 
 	prepareDetectionWidth = 52,
 	prepareDetectionHeight = 52,
+	YIEggID = 953,
 	enemyEggID = 922,
 }
 
@@ -260,6 +261,8 @@ function sampleNPC.onTickEndNPC(v)
 	colBox.x = v.x - 12
 	colBox.y = v.y + v.height - colBox.height
 
+	colBox:Debug(false)
+
 	local npcs = Colliders.getColliding{a = colBox,btype = Colliders.NPC}
 
 	for _,npc in ipairs(npcs) do
@@ -289,34 +292,32 @@ function sampleNPC.onTickEndNPC(v)
 	end
 
 	for _,p in ipairs(NPC.getIntersecting(v.x - 12, v.y - 12, v.x + v.width + 12, v.y + v.height + 12)) do
-        if Colliders.collide(p, v) and not v.friendly and not Defines.cheat_donthurtme and p.id == 953 then
-        
-            p.data.speed.y = RNG.irandomEntry{-1,-2.5,-3,-3.9}
-            data.state = STATE_SWINGBAT
-            data.timer = 0
-            data.animTimer = 0
-            data.turnTimer = 0
-            
-            if p.x <= v.x then
-                v.direction = -1
-            else
-                v.direction = 1
-            end
-            
-            p.data.speed.x = -p.data.speed.x 
-            
-            if p.id == 953 then
-                p:transform(NPC.config[v.id].enemyEggID)
-              
-                local e = Effect.spawn(75,p.x + p.width*0.5 + p.width*0.5*math.sign(p.direction),v.y + v.height*0.5)
-  
-                e.x = e.x - e.width *0.5
-                e.y = e.y - e.height*0.5
-            end
+		if Colliders.collide(p, v) and not v.friendly and not Defines.cheat_donthurtme and p.id == NPC.config[v.id].YIEggID or p.id == NPC.config[v.id].enemyEggID then
+		
+			p.data.speed.y = RNG.irandomEntry{-1,-2.5,-3,-3.9}
+			data.state = STATE_SWINGBAT
+			data.timer = 0
+			data.animTimer = 0
+			data.turnTimer = 0
+			
+			if p.x <= v.x then
+				v.direction = -1
+			else
+				v.direction = 1
+			end
+			
+			p.data.speed.x = -p.data.speed.x 
+			
+			p:transform(NPC.config[v.id].enemyEggID)
+			
+			local e = Effect.spawn(75,p.x + p.width*0.5 + p.width*0.5*math.sign(p.direction),v.y + v.height*0.5)
 
-            SFX.play("egg_hit.ogg")
-        end
-    end
+			e.x = e.x - e.width *0.5
+			e.y = e.y - e.height*0.5
+
+			SFX.play("egg_hit.ogg")
+		end
+	end
 
 	if data.state == STATE_WALK then
 		data.turnTimer = data.turnTimer + 1
