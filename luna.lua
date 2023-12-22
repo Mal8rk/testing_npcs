@@ -17,7 +17,6 @@ end
 function onInputUpdate()
     if player.keys.up == 1 then player.keys.jump = true end -- up to jump
     if player.keys.jump == true then player.keys.jump = 1 end -- convert all jumps to taps (allows repeat jumps)
-    player.keys.altJump = false
     
     if not not not player.keys.left and not not not player.keys.right then
         player.speedX = player.speedX * 0.9

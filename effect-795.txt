@@ -1,0 +1,6 @@
+[1]
+lifetime=20
+frames=1
+framestyle=1
+framespeed=6
+priority=-85

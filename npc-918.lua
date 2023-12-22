@@ -44,12 +44,13 @@ local sampleNPCSettings = {
 
 	grabside=false,
 	grabtop=false,
+	staticdirection=true,
 
-	prepareDetectionWidth = 64,
-	prepareDetectionHeight = 64,
+	prepareDetectionWidth = 52,
+	prepareDetectionHeight = 52,
 	YIEggID = 953,
 	enemyEggID = 922,
-	cursorEffect = 825,
+	cursorEffect = 825
 }
 
 npcManager.setNpcSettings(sampleNPCSettings)
@@ -85,6 +86,7 @@ local STATE_WALK = 0
 local STATE_CATCH = 1
 local STATE_THROW = 2
 local STATE_BONKED = 3
+local STATE_SLIDE = 4
 
 function sampleNPC.onInitAPI()
 	npcManager.registerEvent(npcID, sampleNPC, "onTickEndNPC")
@@ -142,7 +144,7 @@ function sampleNPC.onTickEndNPC(v)
 
 	if not data.initialized then
 		data.initialized = true
-		data.state = STATE_WALK
+		data.state = STATE_SLIDE
 		data.timer = data.timer or 0
 		data.npc = nil
 		data.animTimer = 0
@@ -160,7 +162,7 @@ function sampleNPC.onTickEndNPC(v)
 	colBox.width = config.prepareDetectionWidth
 	colBox.height = config.prepareDetectionHeight
 	
-	colBox.x = v.x - 16
+	colBox.x = v.x - 12
 	colBox.y = v.y + v.height - colBox.height
 
 	colBox:Debug(false)
@@ -216,26 +218,22 @@ function sampleNPC.onTickEndNPC(v)
 		if data.hasCollided and data.thrownNPC then
 			if data.timer >= 88 then
 				
+				 data.dirVectr = vector.v2(
+					(plr.x) - (v.x + v.width * 0.5),
+					(plr.y) - (v.y + v.height * 0.5)
+				):normalize() * 14
+				
 				--Throw the YI egg here
-				if data.transformEgg then 
+				if data.transformEgg then
 					data.thrownNPC:transform(NPC.config[v.id].enemyEggID)
-					data.dirVectr = vector.v2(
-						(plr.x) - (v.x + v.width * 0.5),
-						(plr.y) - (v.y + v.height * 0.5)
-					):normalize() * 14
 					if data.thrownNPC.data.speed then
-						data.thrownNPC.data.speed.x = 14 * v.direction
-						data.thrownNPC.data.speed.y = -Defines.npc_grav + data.dirVectr.y
+						data.thrownNPC.data.speed.x = data.dirVectr.x
+						data.thrownNPC.data.speed.y = data.dirVectr.y
 					end
 				else
 					data.thrownNPC:mem(0x136, FIELD_BOOL, true)
 					data.thrownNPC.friendly = false
 				end
-				
-				data.dirVectr = vector.v2(
-					(plr.x) - (v.x + v.width * 0.5),
-					(plr.y) - (v.y + v.height * 0.5)
-				):normalize() * 14
 
 				data.thrownNPC.x = v.x + 32 * v.direction
 				data.thrownNPC.speedX = data.dirVectr.x
@@ -243,6 +241,7 @@ function sampleNPC.onTickEndNPC(v)
 				v.animationFrame = 16
 				
 				data.thrownNPC = nil
+				data.transformEgg = nil
 				
 			elseif data.timer == 87 then
 				v.animationFrame = 16
@@ -322,6 +321,7 @@ function sampleNPC.onTickEndNPC(v)
 			if data.timer == 1 then
 				data.thrownNPC.animationFrame = 0
 				data.thrownNPC = nil
+				data.transformEgg = nil
 			end
 		end
 		
@@ -346,7 +346,34 @@ function sampleNPC.onTickEndNPC(v)
 	    elseif data.timer >= 1 then
 		    v.animationFrame = 27
 		end
+	elseif data.state == STATE_SLIDE then
+		data.animTimer = 0
+		data.turnTimer = 0
+		v.animationFrame = 5
+
+		if v.collidesBlockBottom then
+            if v.speedX > 0 then
+                v.speedX = math.max(0,v.speedX - 0.15)
+            elseif v.speedX < 0 then
+                v.speedX = math.min(0,v.speedX + 0.15)
+            end
+        else
+            if v.speedX > 0 then
+                v.speedX = math.max(0,v.speedX - 0.15)
+            elseif v.speedX < 0 then
+                v.speedX = math.min(0,v.speedX + 0.15)
+            end
+		end
+
+		if data.timer >= 100 then
+			data.state = STATE_WALK
+			data.timer = 0
+			data.animTimer = 0
+			data.turnTimer = 0
+		end
 	end
+
+	Text.print(data.timer, 8, 8)
 
 	-- animation controlling
 	v.animationFrame = npcutils.getFrameByFramestyle(v, {
